@@ -56,7 +56,7 @@ class action_table():
     CALL = 1
     RAISE = 2
     FOLD = 3
-    NA = 0
+    NA = -1
 
 def format_action(player, action):
     color = False

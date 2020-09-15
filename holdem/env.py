@@ -22,9 +22,12 @@
 # THE SOFTWARE.
 from gym import Env, error, spaces, utils
 from gym.utils import seeding
-
-from treys import Card, Deck, Evaluator
-
+import sys
+sys.path.append('/Users/huangmainland/Desktop/code/github/treys/treys')
+from evaluator import Evaluator
+from card import Card
+from deck import Deck
+from termcolor import colored
 from .player import Player
 from .utils import hand_to_str, format_action, PLAYER_STATE, COMMUNITY_STATE, STATE
 
@@ -245,22 +248,23 @@ class TexasHoldemEnv(Env, utils.EzPickle):
             self._resolve_round(players)
         return self._get_current_step_returns(terminal)
 
-    def render(self, mode='machine', close=False):
-        print('Cycle {}, total pot: {} >>>'.format(self._cycle, self._totalpot))
+    def render(self, mode='machine', close=False,cur_episode=-1000):
+        
         if self._last_actions is not None:
             pid = self._last_player.player_id
-            print('last action by player {}:'.format(pid) + '\t' + format_action(self._last_player, self._last_actions[pid]))
+            print('Player {}\'s action:'.format(pid) + format_action(self._last_player, self._last_actions[pid]))
 
         state = self._get_current_state()
 
         #(player_infos, player_hands) = zip(*state.player_state)
 
-        print('community:')
+        print('Community card:')
         print('-' + hand_to_str(state.community_card, mode))
-        print('players:')
+        print('Players status:')
         for idx, playerstate in enumerate(state.player_states):
-            print('{}{}stack: {}'.format(idx, hand_to_str(playerstate.hand, mode), self._seats[idx].stack))
-        print("<<<")
+            print('Player #{}{}stack={}'.format(colored(idx,'cyan'), hand_to_str(playerstate.hand, mode), self._seats[idx].stack))
+        print('In episode {}, cycle {}, round {}, current player id {}, total pot: {} >>>'.format(cur_episode+1,self._cycle,self._round,self._current_player.player_id, self._totalpot))
+        print("\n")
 
     def _resolve(self, players):
         self._current_player = self._first_to_act(players)
@@ -285,14 +289,14 @@ class TexasHoldemEnv(Env, utils.EzPickle):
         [self._smallblind, self._bigblind] = TexasHoldemEnv.BLIND_INCREMENTS[self._blind_index]
 
     def _post_smallblind(self, player):
-        ''' choosed player to act small blind '''
+        ''' choosed player to act as the small blind '''
         if self._debug:
             print('[DEBUG] player ', player.player_id, 'small blind', self._smallblind)
         self._player_bet(player, self._smallblind)
         player.playedthisround = False
 
     def _post_bigblind(self, player):
-        ''' choosed player to act big blind '''
+        ''' choosed player to act as the big blind '''
         if self._debug:
             print('[DEBUG] player ', player.player_id, 'big blind', self._bigblind)
         self._player_bet(player, self._bigblind)
@@ -336,15 +340,15 @@ class TexasHoldemEnv(Env, utils.EzPickle):
                 player.hand = self._deck.draw(2)
 
     def _flop(self):
-        self._discard.append(self._deck.draw(1)) #burn
+        self._discard.append(self._deck.draw(1)) 
         self.community = self._deck.draw(3)
 
     def _turn(self):
-        self._discard.append(self._deck.draw(1)) #burn
+        self._discard.append(self._deck.draw(1)) 
         self.community.append(self._deck.draw(1))
 
     def _river(self):
-        self._discard.append(self._deck.draw(1)) #burn
+        self._discard.append(self._deck.draw(1))
         self.community.append(self._deck.draw(1))
 
     def _ready_players(self):
@@ -382,6 +386,7 @@ class TexasHoldemEnv(Env, utils.EzPickle):
             print('[DEBUG] sidepots: ', self._side_pots)
 
     def _new_round(self):
+        print(colored("New round starts.",'magenta'))
         for player in self._player_dict.values():
             player.currentbet = 0
             player._roundRaiseCount = 0
@@ -409,7 +414,7 @@ class TexasHoldemEnv(Env, utils.EzPickle):
                 pot_contributors = [p for p in players if p.lastsidepot >= pot_idx]
                 winning_rank = min([p.handrank for p in pot_contributors])
                 winning_players = [p for p in pot_contributors if p.handrank == winning_rank]
-
+                print(colored("Round winner: {}".format(winning_players[0].player_id),'magenta'))
                 for player in winning_players:
                     split_amount = int(self._side_pots[pot_idx]/len(winning_players))
                     if self._debug:

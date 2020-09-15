@@ -1,6 +1,7 @@
 import gym
 import holdem
 import agent
+from termcolor import colored
 
 def lets_play(env, n_seats, model_list):
     while True:
@@ -30,50 +31,24 @@ def lets_play(env, n_seats, model_list):
             # print("reward(t+1)")
             # print(rews)
             # print("<<< Debug Information ")
-            env.render(mode="human")
+            env.render(mode="human",cur_episode=i)
         # print("final state")
         # print(cur_state)
 
-        # total_stack = sum([p.stack for p in env._seats])
-        # if total_stack != 10000:
-        #     return
 
-    print("Episode End!!!")
+    print(colored("Episode ends.\n",'magenta'))
 
-env = gym.make('TexasHoldem-v2') # holdem.TexasHoldemEnv(2)
+env = gym.make('TexasHoldem-v0')
 
 model_list = list()
 
-# start with 4 players
-env.add_player(0, stack=1000) # add a player to seat 0 with 1000 "chips"
-model_list.append(agent.allFoldModel())
+# start with 2 players
+env.add_player(0, stack=1000) 
+model_list.append(agent.idiotModel())
 
-env.add_player(1, stack=1000) # add another player to seat 1 with 2000 "chips"
-model_list.append(agent.allFoldModel())
-
-env.add_player(2, stack=1000) # add another player to seat 2 with 3000 "chips"
-model_list.append(agent.allFoldModel())
-
-env.add_player(3, stack=1000) # add another player to seat 3 with 1000 "chips"
-model_list.append(agent.allFoldModel())
-
-env.add_player(4, stack=1000) # add another player to seat 3 with 1000 "chips"
-model_list.append(agent.allFoldModel())
-
-env.add_player(5, stack=1000) # add another player to seat 3 with 1000 "chips"
-model_list.append(agent.allFoldModel())
-
-env.add_player(6, stack=1000) # add another player to seat 3 with 1000 "chips"
-model_list.append(agent.allCallModel())
-
-env.add_player(7, stack=1000) # add another player to seat 3 with 1000 "chips"
-model_list.append(agent.allFoldModel())
-
-env.add_player(8, stack=1000) # add another player to seat 3 with 1000 "chips"
-model_list.append(agent.allFoldModel())
-
-env.add_player(9, stack=1000) # add another player to seat 3 with 1000 "chips"
+env.add_player(1, stack=1000)
 model_list.append(agent.allinModel())
 
-# play out a hand
-lets_play(env, env.n_seats, model_list)
+max_episode=1
+for i in range(0,max_episode):
+    lets_play(env, env.n_seats, model_list)
