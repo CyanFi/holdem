@@ -1,8 +1,16 @@
 # TrendMicro CoreTech Allhands Holdem Competetion Training Tool 
 
+## Run
+NLH Poker 两人对战
+```sh
+python local_example.py
+```
 ## known issue
-+ sidepot
-
++ allin的时候仍然可以raise（amount 为0）
++ 多episode对战
++ raise没有设置上线(e.g. A:1400 B:600, A最高只能raise到600)
++ sidepot（两个人对战应该可以删掉？）
+---
 ## OpenAI Gym
 [OpenAI Gym 官方網址](https://gym.openai.com/docs/)
 > Gym is a toolkit for developing and comparing reinforcement learning algorithms.
@@ -30,7 +38,7 @@
 1. 局(Episode): 一局遊戲是指參賽的10名玩家進入一張遊戲桌, 持有相等的初始籌碼, 對戰直到本遊戲桌只剩下 不多於半數 玩家勝出, 而其餘玩家因籌碼耗盡而出局為止, 一局由多圈構成
 2. 圈(): 一圈是指 dealer button 圍繞牌桌在每個未出局的玩家手上都出現一次為止為一圈,一圈由多輪構成,在一圈過程中大小盲注數額相等,但是下一圈開始時大小盲注翻倍
 3. 輪(CYCLE): 一輪遊戲是指每次荷官重新發公共牌和私有牌, 每個玩家按回合進行決策, 直到除了一名玩家之外全部棄牌, 或者5張公共牌完全翻開為止, 決出本輪勝負並清算籌碼, 一輪由多個回合構成
-4. 回合(ROUND)): 一回合是指所有玩家依次take action, 稱為一回合, 一個回合中有多個(分別來自各個玩家的)action
+4. 回合(ROUND): 一回合是指所有玩家依次take action, 稱為一回合, 一個回合中有多個(分別來自各個玩家的)action
 5. action(STEP): 一個action是指輪到某一個玩家 call/raise/check/fold/~~bet~~/~~allin~~ 玩家通過 AI 客戶端完成其中一種決策稱之為一個action
 
 ## 安裝方法
