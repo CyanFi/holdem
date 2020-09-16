@@ -1,20 +1,19 @@
 # NLH Poker OpenAI gym environment 
-## 安裝方法
+## Install python environment requirement 
 ```sh
 git clone https://github.com/CyanFi/holdem
 pip install gym
-pip install websocket-client
 pip install git+https://github.com/chuchuhao/treys # 若非 windows環境可以直接 pip install treys
 ```
 ## Run
 NLH Poker 两人对战
 ```sh
-python local_example.py
+python game.py
 ```
 ## known issue
 + allin的时候仍然可以raise（amount 为0）
-+ 多episode对战
-+ raise没有设置上线(e.g. A:1400 B:600, A最高只能raise到600)
++ 一个round中A先出手，B raise完后round直接结束（按照规则A应该做反应）
++ 无法多episode对战
 + sidepot（两个人对战应该可以删掉？）
 ---
 ## OpenAI Gym
@@ -30,26 +29,24 @@ python local_example.py
 這一個版本是從 [wenkesj/holdem](https://github.com/wenkesj/holdem)改寫，主要多增加了以下功能
 + 修改因 openai/gym 在 [commit #836](https://github.com/openai/gym/pull/836) spec change所造成的 crash
 + 新增 `cycle` attribute (發牌一輪為 round, 玩一次為 cycle)
-+ 新增 Interface連接 Trend Micro server
 + 新增 agent template (必須提供兩個 method讓 controller呼叫 (controller為溝通 environment與 agent的橋梁)
-+ 修改因 全部 player hold所造成的 crash
++ 修改因 全部player hold所造成的 crash
 + 限制每一 round 同一 player raise 次數上限為 4次 (可透過參數修改) (自動改成 CALL)
 + 修改 to_call為 此 round絕對數值
++ raise设置上线
 
 另外有改寫 [ihendley/treys](https://github.com/ihendley/treys)，這一個repo是改寫自 */deuce為提供 poker相關計算與管理
 + 修改 f-string not supported under python 3.6
-+ 修改 serup.py在 windows paltform造成的 encoding issue (cp950 decode error)
++ 修改 setup.py在 windows paltform造成的 encoding issue (cp950 decode error)
 
 ### 名詞解釋 (這裡 refactor會影響到 interface暫時先不更改)
-1. 局(Episode): 一局遊戲是指參賽的10名玩家進入一張遊戲桌, 持有相等的初始籌碼, 對戰直到本遊戲桌只剩下 不多於半數 玩家勝出, 而其餘玩家因籌碼耗盡而出局為止, 一局由多圈構成
+1. 局(**Episode**): 一局遊戲是指參賽的10名玩家進入一張遊戲桌, 持有相等的初始籌碼, 對戰直到本遊戲桌只剩下 不多於半數 玩家勝出, 而其餘玩家因籌碼耗盡而出局為止, 一局由多圈構成
 2. 圈(): 一圈是指 dealer button 圍繞牌桌在每個未出局的玩家手上都出現一次為止為一圈,一圈由多輪構成,在一圈過程中大小盲注數額相等,但是下一圈開始時大小盲注翻倍
-3. 輪(CYCLE): 一輪遊戲是指每次荷官重新發公共牌和私有牌, 每個玩家按回合進行決策, 直到除了一名玩家之外全部棄牌, 或者5張公共牌完全翻開為止, 決出本輪勝負並清算籌碼, 一輪由多個回合構成
-4. 回合(ROUND): 一回合是指所有玩家依次take action, 稱為一回合, 一個回合中有多個(分別來自各個玩家的)action
-5. action(STEP): 一個action是指輪到某一個玩家 call/raise/check/fold/~~bet~~/~~allin~~ 玩家通過 AI 客戶端完成其中一種決策稱之為一個action
+3. 輪(**CYCLE**): 一輪遊戲是指每次荷官重新發公共牌和私有牌, 每個玩家按回合進行決策, 直到除了一名玩家之外全部棄牌, 或者5張公共牌完全翻開為止, 決出本輪勝負並清算籌碼, 一輪由多個回合構成
+4. 回合(**ROUND**): 一回合是指所有玩家依次take action, 稱為一回合, 一個回合中有多個(分別來自各個玩家的)action
+5. action(**STEP**): 一個action是指輪到某一個玩家 call/raise/check/fold/~~bet~~/~~allin~~ 玩家通過 AI 客戶端完成其中一種決策稱之為一個action
+6. 大盲（Big blind), 小盲(Small blind)：每一个cycle开始前会指定大盲小盲，且金额会随游戏局数增加而增加
 
-
-## 使用方法
-- local_example: environment為 gym
 
 ### Agent需要提供的 interface
 Agent必須為一個 class並且提供下面兩個 method
@@ -65,8 +62,6 @@ Agent必須為一個 class並且提供下面兩個 method
 #### Valid Phase
 - 可以利用 env來觀察 model行為
 
-#### Test Phase
-- 連上 TM Server做測試
 
 ## State介紹
 

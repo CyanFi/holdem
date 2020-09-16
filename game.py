@@ -29,7 +29,7 @@ def lets_play(env, n_seats, model_list):
             # print("reward(t+1)")
             # print(rews)
             # print("<<< Debug Information ")
-            env.render(mode="human", cur_episode=i)
+            env.render(mode="human")
         # print("final state")
         # print(cur_state)
 

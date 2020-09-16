@@ -161,15 +161,19 @@ class TexasHoldemEnv(Env, utils.EzPickle):
             players = [p for p in self._seats if p.playing_hand]
             self._new_round()
             self._round = 0
-            self._current_player = self._first_to_act(players)
+            self._current_player = sb = self._first_to_act(players)
             self._post_smallblind(self._current_player)
-            self._current_player = self._get_next_player(players, self._current_player)
+            self._current_player = bb = self._get_next_player(players, self._current_player)
             self._post_bigblind(self._current_player)
             self._current_player = self._get_next_player(players, self._current_player)
             self._tocall = self._bigblind
             self._round = 0
             self._deal_next_round()
             self._folded_players = []
+            print(colored(
+                'New Cycle starts. SB: player {}, BB: player {}. BB amount:{}'.format(sb.player_id, bb.player_id,
+                                                                                      self._bigblind), 'magenta'))
+
         else:
             self.episode_end = True
         return self._get_current_reset_returns()
@@ -183,7 +187,7 @@ class TexasHoldemEnv(Env, utils.EzPickle):
               RAISE = 2,
               FOLD = 3
             }
-            RAISE_AMT = [0, minraise]
+            RAISE_AMT = [minraise, maxraise]
            """
         if len(actions) != len(self._seats):
             raise error.Error('actions must be same shape as number of seats.')
@@ -248,16 +252,23 @@ class TexasHoldemEnv(Env, utils.EzPickle):
         if self._round == 4:
             terminal = True
             self._resolve_round(players)
+
+        if terminal == True:
+            valid_actions = []
+        else:
+            valid_actions = self.get_valid_actions(1)
+
         return self._get_current_step_returns(terminal)
 
-    def valid_actions(self, playerid):
-        pass
+    def get_valid_actions(self, playerid):
+        ##TODO
+        return []
 
     def print_round_info(self, cur_episode=-1000):
-        print('In episode {}, cycle {}, round {}, current player id {}, total pot: {} >>>'
-              .format(cur_episode + 1, self._cycle, self._round + 1, self._current_player.player_id,self._totalpot))
+        print('In episode {}, cycle {}, round {}, current player id {}, total pot: {}.'
+              .format(cur_episode + 1, self._cycle, self._round + 1, self._current_player.player_id, self._totalpot))
 
-    def render(self, mode='machine', close=False, cur_episode=-1000):
+    def render(self, mode='machine', close=False):
 
         if self._last_actions is not None:
             pid = self._last_player.player_id
@@ -425,7 +436,7 @@ class TexasHoldemEnv(Env, utils.EzPickle):
                 pot_contributors = [p for p in players if p.lastsidepot >= pot_idx]
                 winning_rank = min([p.handrank for p in pot_contributors])
                 winning_players = [p for p in pot_contributors if p.handrank == winning_rank]
-                print(colored("Round winner: {}".format(winning_players[0].player_id), 'magenta'))
+                print(colored("Cycle winner: {}".format(winning_players[0].player_id), 'magenta'))
                 for player in winning_players:
                     split_amount = int(self._side_pots[pot_idx] / len(winning_players))
                     if self._debug:
@@ -470,6 +481,8 @@ class TexasHoldemEnv(Env, utils.EzPickle):
             'player_id': current_player.player_id,
             'lastraise': self._lastraise,
             'minraise': max(self._bigblind, self._lastraise + self._tocall),
+            "maxraise": min(current_player.stack,
+                            self._get_next_player(self._seats, self._current_player).stack)
         }
 
     def _pad(self, l, n, v):
