@@ -1,4 +1,3 @@
-
 from treys import Card
 from collections import namedtuple
 
@@ -125,10 +124,10 @@ def safe_actions(cur_state, n_seats):  # play safe actions, check when no one el
     return actions
 
 
-def model_list_action(cur_state, n_seats, model_list):
+def model_list_action(cur_state, n_seats, model_list, valid_actions):
     current_player = cur_state.community_state.current_player
     actions = [[action_table.CHECK, action_table.NA]] * n_seats
 
-    model_decision = model_list[current_player].takeAction(cur_state, current_player)
+    model_decision = model_list[current_player].takeAction(cur_state, current_player, valid_actions)
     actions[current_player] = [model_decision.action, model_decision.amount]
     return actions

@@ -80,7 +80,6 @@ class Player(object):
     def validate_action(self, table_state, action):
         """Check player's action. Return the move tuple"""
         self.update_localstate(table_state)
-        bigblind = table_state.get('bigblind')
         tocall = min(table_state.get('tocall'), self.stack)
         minraise = table_state.get('minraise')
         maxraise = table_state.get('maxraise')

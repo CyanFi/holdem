@@ -133,10 +133,9 @@ class TexasHoldemEnv(Env, utils.EzPickle):
         self._reset_game()
         self._ready_players()
         self._cycle += 1
-        self.log.append(dict())
         if self._cycle % self.n_seats == 0:
+            # increase blind
             self._increment_blinds()
-            # print(colored("BB increases to {}".format(self._bigblind), 'magenta'))
 
         [self._smallblind, self._bigblind] = TexasHoldemEnv.BLIND_INCREMENTS[self._blind_index]
 
@@ -155,7 +154,8 @@ class TexasHoldemEnv(Env, utils.EzPickle):
             self._round = 0
             self.deal_card()
             self._folded_players = []
-            print(colored('New Cycle starts. SB: player {}, BB: player {}. BB amount:{}'.format(sb.player_id, bb.player_id,
+            print(colored(
+                'New Cycle starts. SB: player {}, BB: player {}. BB amount:{}'.format(sb.player_id, bb.player_id,
                                                                                       self._bigblind), 'magenta'))
 
         else:
@@ -183,6 +183,7 @@ class TexasHoldemEnv(Env, utils.EzPickle):
 
         if self._round == 4:
             raise error.Error('Rounds already finished, needs to be reset.')
+
         # log last player and his actions
         self._last_player = self._current_player
         self._last_actions = actions
@@ -243,13 +244,30 @@ class TexasHoldemEnv(Env, utils.EzPickle):
         if cycle_terminate:
             valid_actions = []
         else:
-            valid_actions = self.get_valid_actions(1)
+            valid_actions = self.get_valid_actions(self._current_player)
 
-        return self._get_current_step_returns(cycle_terminate)
+        return self._get_current_step_returns(cycle_terminate, valid_actions)
 
-    def get_valid_actions(self, playerid):
-        ##TODO
-        return []
+    def get_valid_actions(self, cur_player):
+        table_state = self._output_state(cur_player)
+        tocall = min(table_state.get('tocall'), cur_player.stack)
+        minraise = table_state.get('minraise')
+        maxraise = table_state.get('maxraise')
+
+        if tocall == 0:
+            if maxraise - minraise >= 0:
+                return {'fold': False, 'check': True, 'call': False, 'raise': True, 'raise_range': [minraise, maxraise]}
+            else:
+                return {'fold': False, 'check': True, 'call': False, 'raise': False}
+        else:
+            # to_call>0
+            if self._last_player and self._last_player.isallin:
+                return {'fold': False, 'check': False, 'call': True, 'raise': False, 'call_amount': tocall}
+            elif maxraise - minraise >= 0:
+                return {'fold': True, 'check': False, 'call': True, 'raise': True, 'call_amount': tocall,
+                        'raise_range': [minraise, maxraise]}
+            else:
+                return {'fold': True, 'check': False, 'call': True, 'raise': False, 'call_amount': tocall}
 
     def print_round_info(self, cur_episode=-1000):
         if self.round_terminate:
@@ -257,7 +275,8 @@ class TexasHoldemEnv(Env, utils.EzPickle):
         else:
             round = self._round + 1
         print('In episode {}, cycle {}, round {}, total pot: {}.'
-              .format(colored(cur_episode + 1,'red'), colored(self._cycle, 'green'),colored(round, 'blue'),self._totalpot))
+              .format(colored(cur_episode + 1, 'red'), colored(self._cycle, 'green'), colored(round, 'blue'),
+                      self._totalpot))
 
     def render(self, mode='machine', close=False, cur_episode=-1000):
 
@@ -268,14 +287,13 @@ class TexasHoldemEnv(Env, utils.EzPickle):
 
         state = self._get_current_state()
 
-        # (player_infos, player_hands) = zip(*state.player_state)
-
         print('Community card:')
         print('-' + hand_to_str(state.community_card, mode))
         print('Players status:')
         for idx, playerstate in enumerate(state.player_states):
-            print('Player #{}{}stack: {} all-in: {}.'.format(colored(idx, 'cyan'), hand_to_str(playerstate.hand, mode),
-                                                            self._seats[idx].stack, self._seats[idx].isallin))
+            print(
+                'Player #{}---{}stack: {} all-in: {}.'.format(colored(idx, 'cyan'), hand_to_str(playerstate.hand, mode),
+                                                              self._seats[idx].stack, self._seats[idx].isallin))
         print("")
 
     def _two_players_all_in(self):
@@ -383,6 +401,7 @@ class TexasHoldemEnv(Env, utils.EzPickle):
 
     def _ready_players(self):
         for p in self._seats:
+            p.isallin = False
             if not p.emptyplayer and p.sitting_out:
                 p.sitting_out = False
                 p.playing_hand = True
@@ -535,8 +554,8 @@ class TexasHoldemEnv(Env, utils.EzPickle):
     def _get_current_reset_returns(self):
         return self._get_current_state()
 
-    def _get_current_step_returns(self, terminal):
+    def _get_current_step_returns(self, terminal, valid_actions=[]):
         obs = self._get_current_state()
         # TODO, make this something else?
         rew = [player.stack for player in self._seats]
-        return obs, rew, terminal, []  # TODO, return some info?
+        return obs, rew, terminal, valid_actions

@@ -22,21 +22,32 @@ class idiotModel():
     def loadModel(self, path):
         return
 
-    def takeAction(self, state, playerid):
+    def takeAction(self, state, playerid, valid_actions):
         """ random action"""
-        if state.community_state.to_call > 0:
-            if random.random() > 0.7:
-                return ACTION(action_table.FOLD, 0)
-            else:
-                return ACTION(action_table.CALL, state.community_state.to_call)
+        tmp = []
+        if valid_actions['fold']:
+            tmp.append('fold')
+        if valid_actions['check']:
+            tmp.append('check')
+        if valid_actions['call']:
+            tmp.append('call')
+        if valid_actions['raise']:
+            tmp.append('raise')
+        choice = random.choice(tmp)
+
+        if choice == 'fold':
+            return ACTION(action_table.FOLD, 0)
+        elif choice == 'check':
+            return ACTION(action_table.CHECK, 0)
+        elif choice == 'call':
+            return ACTION(action_table.CALL, valid_actions['call_amount'])
+        elif choice == 'raise':
+            if valid_actions['raise_range'][1]<valid_actions['raise_range'][0]:
+                IndexError
+            raise_amount = random.randint(valid_actions['raise_range'][0], valid_actions['raise_range'][1])
+            return ACTION(action_table.RAISE, raise_amount)
         else:
-            random_num = random.random()
-            if random_num > 0.9:
-                return ACTION(action_table.RAISE, state.player_states[playerid].stack)
-            elif random_num > 0.7:
-                return ACTION(action_table.RAISE, 50)
-            else:
-                return ACTION(action_table.CHECK, 0)
+            assert 1 == 0
 
     def getReload(self, state):
         """return `True` if reload is needed under state, otherwise `False`"""

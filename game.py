@@ -11,19 +11,18 @@ def lets_play(env, n_seats, model_list):
         cycle_terminal = False
         if env.episode_end:
             break
-
+        valid_actions=env.get_valid_actions(env._current_player)
         while not cycle_terminal:
- 
-            actions = holdem.model_list_action(cur_state, n_seats=n_seats, model_list=model_list)
-            cur_state, rews, cycle_terminal, info = env.step(actions)
-            env.render(mode="human",cur_episode=i)
+            actions = holdem.model_list_action(cur_state, n_seats=n_seats, model_list=model_list,valid_actions=valid_actions)
+            cur_state, rews, cycle_terminal, valid_actions = env.step(actions)
+            env.render(mode="human", cur_episode=i)
 
     print(colored("Episode ends.\n", 'magenta'))
 
 
 env = gym.make('TexasHoldem-v0')
 model_list = list()
-increment_blind=False
+increment_blind = False
 
 # start with 2 players
 env.add_player(0, stack=1000)
