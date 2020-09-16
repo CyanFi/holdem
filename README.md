@@ -51,7 +51,7 @@ python game.py
 
 ### Agent需要提供的 interface
 Agent必須為一個 class並且提供下面兩個 method
-+ `takeAction(self, state, playerid)` return ACTION (namedtupled)
++ `takeAction(self, state, playerid, valid_actions)` return ACTION (namedtupled)
 + `getReload(self, state)` reutrn {True/ False}
 
 #### Train Phase
