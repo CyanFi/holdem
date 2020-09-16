@@ -1,8 +1,8 @@
 #! /usr/bin/env python
 # -*- coding:utf-8 -*-
 import json
-from websocket import create_connection
-from websocket._exceptions import WebSocketConnectionClosedException
+# from websocket import create_connection
+# from websocket._exceptions import WebSocketConnectionClosedException
 import hashlib
 from .utils import hand_to_str, format_action, PLAYER_STATE, COMMUNITY_STATE, STATE, ACTION, action_table, card_str_to_list
 from .player import Player

@@ -1,5 +1,11 @@
-# TrendMicro CoreTech Allhands Holdem Competetion Training Tool 
-
+# NLH Poker OpenAI gym environment 
+## 安裝方法
+```sh
+git clone https://github.com/CyanFi/holdem
+pip install gym
+pip install websocket-client
+pip install git+https://github.com/chuchuhao/treys # 若非 windows環境可以直接 pip install treys
+```
 ## Run
 NLH Poker 两人对战
 ```sh
@@ -41,25 +47,15 @@ python local_example.py
 4. 回合(ROUND): 一回合是指所有玩家依次take action, 稱為一回合, 一個回合中有多個(分別來自各個玩家的)action
 5. action(STEP): 一個action是指輪到某一個玩家 call/raise/check/fold/~~bet~~/~~allin~~ 玩家通過 AI 客戶端完成其中一種決策稱之為一個action
 
-## 安裝方法
-```sh
-# better run under virtualenv
-git clone https://github.com/chuchuhao/holdem.git
-pip install gym
-pip install websocket-client
-pip install git+https://github.com/chuchuhao/treys # 若非 windows環境可以直接 pip install treys
-```
 
 ## 使用方法
 - local_example: environment為 gym
-- web_example: enviroment為 Trend Micro Server
 
 ### Agent需要提供的 interface
 Agent必須為一個 class並且提供下面兩個 method
 + `takeAction(self, state, playerid)` return ACTION (namedtupled)
 + `getReload(self, state)` reutrn {True/ False}
 
-### 如何參與 TM holdem
 #### Train Phase
 - 將下面會介紹的 State Tuple拿出 verorized state 餵給 model吃
 - 可以利用 env利用指定 policy來生成 training data做 batch learning
