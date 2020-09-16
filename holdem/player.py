@@ -98,7 +98,6 @@ class Player(object):
         self.stack = table_state.get('stack')
         self.hand = table_state.get('pocket_cards')
 
-    # cleanup
     def player_move(self, table_state, action):
         """Check player's action"""
         self.update_localstate(table_state)

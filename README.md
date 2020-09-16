@@ -1,20 +1,21 @@
 # NLH Poker OpenAI gym environment 
-## Install python environment requirement 
+## Python environment requirement 
 ```sh
 git clone https://github.com/CyanFi/holdem
 pip install gym
 pip install git+https://github.com/chuchuhao/treys # 若非 windows環境可以直接 pip install treys
 ```
 ## Run
-NLH Poker 两人对战
+NLH Poker Game with Two Players
 ```sh
 python game.py
 ```
-## known issue
+## Known issues
 + allin的时候仍然可以raise（amount 为0）
 + 一个round中A先出手，B raise完后round直接结束（按照规则A应该做反应）
 + 无法多episode对战
-+ sidepot（两个人对战应该可以删掉？）
++ 显示raise但是没有放筹码
++ minor bugs in logging
 ---
 ## OpenAI Gym
 [OpenAI Gym 官方網址](https://gym.openai.com/docs/)
@@ -33,7 +34,8 @@ python game.py
 + 修改因 全部player hold所造成的 crash
 + 限制每一 round 同一 player raise 次數上限為 4次 (可透過參數修改) (自動改成 CALL)
 + 修改 to_call為 此 round絕對數值
-+ raise设置上线
++ raise amount设置上限
++ 可以手动选择是否increment_blind
 
 另外有改寫 [ihendley/treys](https://github.com/ihendley/treys)，這一個repo是改寫自 */deuce為提供 poker相關計算與管理
 + 修改 f-string not supported under python 3.6
@@ -77,7 +79,7 @@ agent會接到一個由 namedtuple所包成的 state, 包含下列三個項目
         + `playing_hand`, (boolean), 玩家目前有在玩此 cycle
         + `handrank`, (number), 由 treys.Evaluator.evaluate(hand, community), 每一個 round結束後都會計算
         + `playedthisround`, (boolean), 玩家是否已經玩過此 round (1 cycle 有4 rounds)
-        + `betting`, (number), 玩家在此 cycle已下注的金額
+        + `betting`, (number), 玩家在此 cycle已下注的金額 (player class 下的 `currentbet`指当前round的下注金额)
         + `isallin`, (boolean), 0 not all in, 1 all in
         + `lastsidepot`, (number), resolve when someone all in  <NOT USING NOW> 目前 sidepot相關功能都沒有使用
         + `reloadCount`, (number), <ONLY TM USED> 在 openai/gym中沒有適用到 reload功能

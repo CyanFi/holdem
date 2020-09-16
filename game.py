@@ -7,7 +7,7 @@ from termcolor import colored
 def lets_play(env, n_seats, model_list):
     while True:
         cur_state = env.reset()
-        env.render(mode='human')
+        # env.render(mode='human')
         cycle_terminal = False
         if env.episode_end:
             break
@@ -19,7 +19,8 @@ def lets_play(env, n_seats, model_list):
             # for p in cur_state.player_states:
             #     print(p)
             # print(cur_state.community_state)
-            env.print_round_info(i)
+
+            # env.print_round_info(i)
             actions = holdem.model_list_action(cur_state, n_seats=n_seats, model_list=model_list)
             cur_state, rews, cycle_terminal, info = env.step(actions)
 
@@ -29,7 +30,8 @@ def lets_play(env, n_seats, model_list):
             # print("reward(t+1)")
             # print(rews)
             # print("<<< Debug Information ")
-            env.render(mode="human")
+            env.render(mode="human",cur_episode=i+1)
+
         # print("final state")
         # print(cur_state)
 
@@ -37,8 +39,8 @@ def lets_play(env, n_seats, model_list):
 
 
 env = gym.make('TexasHoldem-v0')
-
 model_list = list()
+increment_blind=False
 
 # start with 2 players
 env.add_player(0, stack=1000)
