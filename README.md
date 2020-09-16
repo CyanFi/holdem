@@ -11,11 +11,10 @@ NLH Poker Game with Two Players
 python game.py
 ```
 ## Known issues
-+ allin的时候仍然可以raise（amount 为0）
-+ 一个round中A先出手，B raise完后round直接结束（按照规则A应该做反应）
++ agent 无法知道在当前状况下自己可以进行的action
 + 无法多episode对战
-+ 显示raise但是没有放筹码
-+ minor bugs in logging
++ 显示raise但是没有放筹码(?)
++ sidepot(?)
 ---
 ## OpenAI Gym
 [OpenAI Gym 官方網址](https://gym.openai.com/docs/)
