@@ -10,6 +10,10 @@ NLH Poker Game with Two Players
 ```sh
 python game.py
 ```
+Arguments:
+- `--log`: add it if you want you save the game log, note that you may need create a `log` directory in the root.
+- `--max_episode`: this defines how many episodes will be conducted in the game, by default: 1. 
+- `--ç`: add it if you don't want blind increment in a episode, by default there is blind increment.
 ## Known issues and coming features
 + 无法多episode对战
 + sidepot(?)

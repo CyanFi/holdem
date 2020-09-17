@@ -14,7 +14,7 @@ class TexasHoldemEnv(Env, utils.EzPickle):
     BLIND_INCREMENTS = [[10, 20], [20, 40], [40, 80], [80, 160], [160, 320]]
 
     def __init__(self, n_seats, max_limit=20000, debug=False):
-        self.log = []
+        self.log = False
         n_suits = 4  # s,h,d,c
         n_ranks = 13  # 2,3,4,5,6,7,8,9,T,J,Q,K,A
         n_community_cards = 5  # flop, turn, river
@@ -26,6 +26,7 @@ class TexasHoldemEnv(Env, utils.EzPickle):
         self._cycle = 0
         self._blind_index = 0
         [self._smallblind, self._bigblind] = TexasHoldemEnv.BLIND_INCREMENTS[0]
+        self.blind_increment = True
         self._deck = Deck()
         self._evaluator = Evaluator()
 
@@ -132,7 +133,7 @@ class TexasHoldemEnv(Env, utils.EzPickle):
         self._reset_game()
         self._ready_players()
         self._cycle += 1
-        if self._cycle % self.n_seats == 0:
+        if self.blind_increment and self._cycle % self.n_seats == 0:
             # increase blind
             self._increment_blinds()
 
@@ -153,7 +154,7 @@ class TexasHoldemEnv(Env, utils.EzPickle):
             self._round = 0
             self.deal_card()
             self._folded_players = []
-            print(colored(
+            print(self.colored_output(
                 'New Cycle starts. SB: player {}, BB: player {}. BB amount:{}'.format(sb.player_id, bb.player_id,
                                                                                       self._bigblind), 'magenta'))
             all_in_players = [p for p in self._seats if p.isallin]
@@ -279,7 +280,8 @@ class TexasHoldemEnv(Env, utils.EzPickle):
         else:
             round = self._round + 1
         print('In episode {}, cycle {}, round {}, total pot: {}.'
-              .format(colored(cur_episode + 1, 'red'), colored(self._cycle, 'green'), colored(round, 'blue'),
+              .format(self.colored_output(cur_episode + 1, 'red'), self.colored_output(self._cycle, 'green'),
+                      self.colored_output(round, 'blue'),
                       self._totalpot))
 
     def render(self, mode='machine', close=False, cur_episode=-1000):
@@ -296,7 +298,8 @@ class TexasHoldemEnv(Env, utils.EzPickle):
         print('Players status:')
         for idx, playerstate in enumerate(state.player_states):
             print(
-                'Player #{}---{}stack: {} all-in: {}.'.format(colored(idx, 'cyan'), hand_to_str(playerstate.hand, mode),
+                'Player #{}---{}stack: {} all-in: {}.'.format(self.colored_output(idx, 'cyan'),
+                                                              hand_to_str(playerstate.hand, mode),
                                                               self._seats[idx].stack, self._seats[idx].isallin))
         print("")
 
@@ -461,7 +464,7 @@ class TexasHoldemEnv(Env, utils.EzPickle):
                 pot_contributors = [p for p in players if p.lastsidepot >= pot_idx]
                 winning_rank = min([p.handrank for p in pot_contributors])
                 winning_players = [p for p in pot_contributors if p.handrank == winning_rank]
-                print(colored("Cycle winner: {}".format(winning_players[0].player_id), 'magenta'))
+                print(self.colored_output("Cycle winner: {}".format(winning_players[0].player_id), 'magenta'))
                 for player in winning_players:
                     split_amount = int(self._side_pots[pot_idx] / len(winning_players))
                     if self._debug:
@@ -551,6 +554,11 @@ class TexasHoldemEnv(Env, utils.EzPickle):
 
     def _get_current_step_returns(self, terminal, valid_actions=[]):
         obs = self._get_current_state()
-        # TODO, make this something else?
         rew = [player.stack for player in self._seats]
         return obs, rew, terminal, valid_actions
+
+    def colored_output(self, string, color):
+        if self.log:
+            return string
+        else:
+            return colored(string, color)

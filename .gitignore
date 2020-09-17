@@ -3,6 +3,7 @@
 /build
 /test
 /examples
+/log
 __pycache__
 *.DS_Store
 .idea
