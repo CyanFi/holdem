@@ -11,8 +11,7 @@ from .utils import hand_to_str, format_action, PLAYER_STATE, COMMUNITY_STATE, ST
 
 
 class TexasHoldemEnv(Env, utils.EzPickle):
-    BLIND_INCREMENTS = [[10, 20], [20, 40], [40, 80], [80, 160], [160, 320], [320, 640], [640, 1280], [1280, 2560],
-                        [2560, 5120], [5120, 10240]]
+    BLIND_INCREMENTS = [[10, 20], [20, 40], [40, 80], [80, 160], [160, 320]]
 
     def __init__(self, n_seats, max_limit=20000, debug=False):
         self.log = []
@@ -157,10 +156,17 @@ class TexasHoldemEnv(Env, utils.EzPickle):
             print(colored(
                 'New Cycle starts. SB: player {}, BB: player {}. BB amount:{}'.format(sb.player_id, bb.player_id,
                                                                                       self._bigblind), 'magenta'))
+            all_in_players=[p for p in self._seats if p.isallin]
+            if all_in_players:
+                # Player are "forced" to all in
+                self._resolve_sidepots_each_round(self._seats)
+                self._two_players_all_in()
+                self.cycle_checkout(self._seats)
+                return self._get_current_reset_returns(),True
 
         else:
             self.episode_end = True
-        return self._get_current_reset_returns()
+        return self._get_current_reset_returns(),False
 
     def step(self, actions):
         """ Run one timestep of the game (t -> t+1)
@@ -196,13 +202,15 @@ class TexasHoldemEnv(Env, utils.EzPickle):
             self._player_bet(self._current_player, self._tocall - self._current_player.currentbet)
             if self._debug:
                 print('[DEBUG] Player', self._current_player.player_id, move)
-            self._current_player = self._get_next_player(alive_players, self._current_player)
-            if self._current_player.isallin:
-                # if player calls all-in, deal the cards directly
+            next_player = self._get_next_player(alive_players, self._current_player)
+            if self._current_player.isallin or next_player.isallin:
+                # if player calls all-in or after call, the player himself is all-in, deal the cards directly
                 self._resolve_sidepots_each_round(self._seats)
                 self._two_players_all_in()
                 self.cycle_checkout(self._seats)
                 return self._get_current_step_returns(True)
+            #
+            self._current_player=next_player
 
         elif move[0] == 'check':
             self._player_bet(self._current_player, 0)
@@ -255,6 +263,9 @@ class TexasHoldemEnv(Env, utils.EzPickle):
         maxraise = table_state.get('maxraise')
 
         if tocall == 0:
+            if self._last_player and self._last_player.isallin:
+                #  opponent is all-in
+                return {'fold': False, 'check': False, 'call': True, 'raise': False, 'call_amount': tocall}
             if maxraise - minraise >= 0:
                 return {'fold': False, 'check': True, 'call': False, 'raise': True, 'raise_range': [minraise, maxraise]}
             else:
@@ -262,7 +273,8 @@ class TexasHoldemEnv(Env, utils.EzPickle):
         else:
             # to_call>0
             if self._last_player and self._last_player.isallin:
-                return {'fold': False, 'check': False, 'call': True, 'raise': False, 'call_amount': tocall}
+                #  opponent is all-in
+                return {'fold': True, 'check': False, 'call': True, 'raise': False, 'call_amount': tocall}
             elif maxraise - minraise >= 0:
                 return {'fold': True, 'check': False, 'call': True, 'raise': True, 'call_amount': tocall,
                         'raise_range': [minraise, maxraise]}
@@ -337,24 +349,18 @@ class TexasHoldemEnv(Env, utils.EzPickle):
 
     def _post_smallblind(self, player):
         """ choose player to act as the small blind """
-        if self._debug:
-            print('[DEBUG] player ', player.player_id, 'small blind', self._smallblind)
         self._player_bet(player, self._smallblind)
         player.playedthisround = False
 
+
     def _post_bigblind(self, player):
         """ choose player to act as the big blind """
-        if self._debug:
-            print('[DEBUG] player ', player.player_id, 'big blind', self._bigblind)
         self._player_bet(player, self._bigblind)
         player.playedthisround = False
         self._lastraise = self._bigblind
 
     def _player_bet(self, player, player_bet):
         total_bet = min(player.stack, player_bet) + player.currentbet
-        # Check if the player is all in
-        if total_bet == player.stack:
-            player.isallin = True
 
         self._roundpot = max(self._roundpot, total_bet)
         self._totalpot += (total_bet - player.currentbet)

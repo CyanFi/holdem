@@ -11,10 +11,9 @@ NLH Poker Game with Two Players
 python game.py
 ```
 ## Known issues
-+ agent 无法知道在当前状况下自己可以进行的action
 + 无法多episode对战
 + 显示raise但是没有放筹码(?)
-+ sidepot(?)
++ sidepot
 ---
 ## OpenAI Gym
 [OpenAI Gym 官方網址](https://gym.openai.com/docs/)
@@ -28,7 +27,7 @@ python game.py
 
 這一個版本是從 [wenkesj/holdem](https://github.com/wenkesj/holdem)改寫，主要多增加了以下功能
 + 修改因 openai/gym 在 [commit #836](https://github.com/openai/gym/pull/836) spec change所造成的 crash
-+ 新增 `cycle` attribute (發牌一輪為 round, 玩一次為 cycle)
++ 新增 `cycle` attribute 
 + 新增 agent template (必須提供兩個 method讓 controller呼叫 (controller為溝通 environment與 agent的橋梁)
 + 修改因 全部player hold所造成的 crash
 + 限制每一 round 同一 player raise 次數上限為 4次 (可透過參數修改) (自動改成 CALL)

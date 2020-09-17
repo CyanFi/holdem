@@ -6,14 +6,17 @@ from termcolor import colored
 
 def lets_play(env, n_seats, model_list):
     while True:
-        cur_state = env.reset()
-        # env.render(mode='human')
-        cycle_terminal = False
+        cur_state, cycle_terminal = env.reset()
+
+        if cycle_terminal:
+            # a cycle may terminate here because players may be "forced" to all in if they have a low stack
+            env.render(mode='human', cur_episode=i)
         if env.episode_end:
             break
-        valid_actions=env.get_valid_actions(env._current_player)
+        valid_actions = env.get_valid_actions(env._current_player)
         while not cycle_terminal:
-            actions = holdem.model_list_action(cur_state, n_seats=n_seats, model_list=model_list,valid_actions=valid_actions)
+            actions = holdem.model_list_action(cur_state, n_seats=n_seats, model_list=model_list,
+                                               valid_actions=valid_actions)
             cur_state, rews, cycle_terminal, valid_actions = env.step(actions)
             env.render(mode="human", cur_episode=i)
 
