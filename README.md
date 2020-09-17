@@ -10,10 +10,13 @@ NLH Poker Game with Two Players
 ```sh
 python game.py
 ```
-## Known issues
+## Known issues and coming features
 + 无法多episode对战
-+ 显示raise但是没有放筹码(?)
-+ sidepot
++ sidepot(?)
++ 函数名变量名瞎jb写
+
+- add a human agent
+- config from terminal
 ---
 ## OpenAI Gym
 [OpenAI Gym 官方網址](https://gym.openai.com/docs/)
