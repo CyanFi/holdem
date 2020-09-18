@@ -91,8 +91,8 @@ class Player(object):
         if tocall == 0:
             assert action_idx in [Player.CHECK, Player.RAISE]
             if action_idx == Player.RAISE:
-                if self._roundRaiseCount > self._roundRaiseLimit:
-                    raise error.Error('raise times ({}) in this round had exceed limitation ({})'.format(self._roundRaiseCount, self._roundRaiseLimit))
+                # if self._roundRaiseCount > self._roundRaiseLimit:
+                #     raise error.Error('raise times ({}) in this round had exceed limitation ({})'.format(self._roundRaiseCount, self._roundRaiseLimit))
                 if raise_amount < minraise:
                     raise error.Error('Raise amount {} must be no less than minraise {}.'.format(raise_amount,minraise))
                 if raise_amount > maxraise:

@@ -1,4 +1,4 @@
-from .idiotAgent import idiotModel
+from .randomAgent import randomModel
 # from .debugAgent import debugModel
 # from .dqn_agent import dqnModel
 # from .allfoldAgent import allFoldModel

@@ -1,4 +1,10 @@
 # NLH Poker OpenAI gym environment 
+## Features:
++ multi-episodes
++ Heads up（单挑） only
++ random player
++ User could create agent on his own (details later)
++ save log in `/log` directory
 ## Python environment requirement 
 ```sh
 git clone https://github.com/CyanFi/holdem
@@ -6,16 +12,14 @@ pip install gym
 pip install git+https://github.com/chuchuhao/treys # 若非 windows環境可以直接 pip install treys
 ```
 ## Run
-NLH Poker Game with Two Players
 ```sh
 python game.py
 ```
 Arguments:
 - `--log`: add it if you want you save the game log, note that you may need create a `log` directory in the root.
 - `--max_episode`: this defines how many episodes will be conducted in the game, by default: 1. 
-- `--ç`: add it if you don't want blind increment in a episode, by default there is blind increment.
+- `--no_blind_increment`: add it if you don't want blind increment in a episode, by default there is blind increment.
 ## Known issues and coming features
-+ 无法多episode对战
 + sidepot(?)
 + 函数名变量名瞎jb写
 

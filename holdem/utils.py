@@ -43,15 +43,11 @@ class action_table():
     NA = -1
 
 
-def format_action(player, action):
+def format_action(player, action, mode):
     color = False
-    try:
+    if mode == 'human':
         from termcolor import colored
-        # for mac, linux: http://pypi.python.org/pypi/termcolor
-        # can use for windows: http://pypi.python.org/pypi/colorama
         color = True
-    except ImportError:
-        pass
     [aid, raise_amt] = action
     if aid == action_table.CHECK:
         text = '_ check, cycle bet: {}.'.format(player.betting)

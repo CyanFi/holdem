@@ -22,33 +22,11 @@ class TexasHoldemEnv(Env, utils.EzPickle):
         n_stud = 5
 
         self.n_seats = n_seats
-
-        self._cycle = 0
-        self._blind_index = 0
-        [self._smallblind, self._bigblind] = TexasHoldemEnv.BLIND_INCREMENTS[0]
-        self.blind_increment = True
-        self._deck = Deck()
-        self._evaluator = Evaluator()
-
-        self.community = []
-        self._round = 0
-        self._button = 0
-        self._discard = []
-
-        self._side_pots = [0] * n_seats
-        self._current_sidepot = 0  # index of _side_pots
-        self._totalpot = 0
-        self._tocall = 0
-        self._lastraise = 0
-
         # fill seats with dummy players
-        self._seats = [Player(i, stack=0, emptyplayer=True) for i in range(n_seats)]
-        self.emptyseats = n_seats
-        self._player_dict = {}
-        self._current_player = None
-        self._debug = debug
-        self._last_player = None
-        self._last_actions = None
+        self._seats = [Player(i, stack=0, emptyplayer=True) for i in range(self.n_seats)]
+        self.emptyseats = self.n_seats
+
+        self.episode_reset()
 
         self.observation_space = spaces.Tuple([
             spaces.Tuple([  # # **players info**
@@ -96,7 +74,6 @@ class TexasHoldemEnv(Env, utils.EzPickle):
                                                  max_limit,  # raise_amount
                                              ]),
                                          ] * n_seats)
-        self.episode_end = False
 
     def add_player(self, seat_id, stack=1000):
         """Add a player to the environment seat with the given stack (chipcount)"""
@@ -126,6 +103,35 @@ class TexasHoldemEnv(Env, utils.EzPickle):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
 
+    def episode_reset(self):
+        """reset a episode"""
+        self._cycle = 0
+        self._blind_index = 0
+        [self._smallblind, self._bigblind] = TexasHoldemEnv.BLIND_INCREMENTS[0]
+        self.blind_increment = True
+        self._deck = Deck()
+        self._evaluator = Evaluator()
+
+        self.community = []
+        self._round = 0
+        self._button = 0
+        self._discard = []
+
+        self._side_pots = [0] * self.n_seats
+        self._current_sidepot = 0  # index of _side_pots
+        self._totalpot = 0
+        self._tocall = 0
+        self._lastraise = 0
+        self._roundpot = 0
+
+        self._player_dict = {}
+        self._current_player = None
+        self._last_player = None
+        self._last_actions = None
+        self._debug = False
+
+        self.episode_end = False
+
     def reset(self):
         """
         Reset a cycle
@@ -141,6 +147,7 @@ class TexasHoldemEnv(Env, utils.EzPickle):
 
         alive_player = sum([1 if p.stack > 0 else 0 for p in self._seats])
         if (self.emptyseats < len(self._seats) - 1) and (alive_player > len(self._seats) // 2):
+            # episode continues
             players = [p for p in self._seats if p.playing_hand]
             self._new_round_env()
             self._round = 0
@@ -163,10 +170,14 @@ class TexasHoldemEnv(Env, utils.EzPickle):
                 self._resolve_sidepots_each_round(self._seats)
                 self._two_players_all_in()
                 self.cycle_checkout(self._seats)
+                if [p for p in self._seats if p.stack == 0]:
+                    # A player is forced to all-in ,and he loses in all-in bet.
+                    self.episode_end = True
                 return self._get_current_reset_returns(), True
 
         else:
             self.episode_end = True
+            return self._get_current_reset_returns(), True
         return self._get_current_reset_returns(), False
 
     def step(self, actions):
@@ -207,6 +218,9 @@ class TexasHoldemEnv(Env, utils.EzPickle):
                 self._resolve_sidepots_each_round(self._seats)
                 self._two_players_all_in()
                 self.cycle_checkout(self._seats)
+                if [p for p in self._seats if p.stack == 0]:
+                    # A player is forced to all-in ,and he loses in all-in bet.
+                    self.episode_end = True
                 return self._get_current_step_returns(True)
             self._current_player = next_player
 
@@ -289,7 +303,7 @@ class TexasHoldemEnv(Env, utils.EzPickle):
         self.print_round_info(cur_episode)
         if self._last_actions is not None:
             pid = self._last_player.player_id
-            print('Player {}\'s action:'.format(pid) + format_action(self._last_player, self._last_actions[pid]))
+            print('Player {}\'s action:'.format(pid) + format_action(self._last_player, self._last_actions[pid], mode))
 
         state = self._get_current_state()
 

@@ -4,7 +4,7 @@ from holdem import PLAYER_STATE, COMMUNITY_STATE, STATE, ACTION, action_table
 import random
 
 
-class idiotModel():
+class randomModel():
     def __init__(self):
         self._nothing = "test"
         self.reload_left = 2
